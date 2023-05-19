@@ -1,2 +1,1 @@
-# hw
-Homework repository
+### Homework repository
