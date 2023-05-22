@@ -1,0 +1,21 @@
+{
+	"data_prep": {
+		"dataset_url": "https://raw.githubusercontent.com/wmarci/hw/main/messy_iris.csv",
+		"train_test_split_ratio": 0.20,
+		"mapping": {
+			"Iris-setosa": 0,
+			"Iris-versicolor": 1,
+			"Iris-virginica": 2
+		}
+	},
+	"train_eval": {
+		"checkpoints_dir": "/container_files/checkpoints",
+		"metrics_dir": "/container_files/metrics",
+		"checkpoints_save_iter": 20,
+		"epochs": 120,
+		"learning_rate": 0.01
+	},
+	"inference": {
+		"model_path": "/container_files/model/model.pt"
+	}
+}

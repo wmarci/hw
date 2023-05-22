@@ -1,0 +1,77 @@
+version: "3.9"
+services:
+  minio:
+    container_name: minio
+    image: quay.io/minio/minio
+    command: server /data --console-address ":9001"
+    env_file:
+      - variables.env
+    volumes:
+      - ./minio_data:/data
+    ports:
+      - 9001:9001
+    networks:
+      - pipeline
+  iris-prep:
+    container_name: iris-prep
+    volumes:
+       - ./config:/config
+    build:
+      context: ./data_prep
+    image: iris-prep
+    env_file:
+      - variables.env
+    depends_on:
+      - minio
+    networks:
+      - pipeline
+  iris-train:
+    container_name: iris-train
+    volumes:
+       - ./config:/config
+    build:
+      context: ./train_eval
+      target: train
+    image: iris-train
+    env_file:
+      - variables.env
+    depends_on:
+      iris-prep:
+        condition: service_completed_successfully
+    networks:
+      - pipeline
+  iris-eval:
+    container_name: iris-eval
+    volumes:
+       - ./config:/config
+    build:
+      context: ./train_eval
+      target: eval
+    image: iris-eval
+    env_file:
+      - variables.env
+    depends_on:
+      iris-train:
+        condition: service_completed_successfully
+    networks:
+      - pipeline
+  iris-inference:
+    container_name: iris-inference
+    ports:
+      - 5000:5000
+    volumes:
+       - ./config:/config
+    build:
+      context: ./inference
+    image: iris-inference
+    env_file:
+      - variables.env
+    depends_on:
+      iris-eval:
+        condition: service_completed_successfully
+    networks:
+      - pipeline
+networks:
+  pipeline:
+    name: pipeline
+    driver: "bridge"
